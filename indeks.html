@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadwal Kelas - SMAN 1 Dramaga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #a8b5c9; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #8e9db1; }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-content { animation: slideDown 0.3s ease-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        
+        #schedule-table-body tr:nth-child(even), #users-table-body tr:nth-child(even) { background-color: #f8fafc; }
+
+        .tooltip { position: relative; display: inline-block; }
+        .tooltip .tooltip-text {
+            visibility: hidden; width: 80px; background-color: #334155;
+            color: #fff; text-align: center; border-radius: 6px;
+            padding: 5px 0; position: absolute; z-index: 1; bottom: 125%;
+            left: 50%; margin-left: -40px; opacity: 0; transition: opacity 0.3s; font-size: 12px;
+        }
+        .tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="app-container" class="container mx-auto p-4 min-h-screen flex items-center justify-center">
+
+        <!-- ===== HALAMAN LOGIN ===== -->
+        <div id="login-view" class="w-full max-w-md fade-in">
+            <div class="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-8">
+                <div class="flex flex-col items-center mb-6">
+                     <div class="bg-indigo-500 p-3 rounded-full text-white mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                     </div>
+                    <h1 class="text-3xl font-extrabold text-slate-800 text-center">Jadwal Kelas Digital</h1>
+                    <p class="text-center text-slate-500 mt-2">SMAN 1 Dramaga</p>
+                </div>
+                
+                <form id="login-form">
+                    <div class="mb-4 relative">
+                        <input type="text" id="username" class="w-full pl-4 pr-3 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" placeholder="Username" required>
+                    </div>
+                    <div class="mb-4 relative">
+                        <input type="password" id="password" class="w-full pl-4 pr-3 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" placeholder="Password" required>
+                    </div>
+                    <div id="login-error" class="hidden text-red-500 text-sm mb-4 text-center font-medium">Username atau password salah!</div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 shadow-lg hover:shadow-indigo-500/50">Login</button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-slate-500">Belum punya akun? 
+                        <button id="show-register-btn" class="text-indigo-600 hover:text-indigo-800 font-semibold group transition">
+                            Daftar di sini
+                        </button>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== HALAMAN REGISTRASI ===== -->
+        <div id="register-view" class="hidden w-full max-w-md fade-in">
+             <div class="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-8">
+                <div class="flex flex-col items-center mb-6">
+                    <div class="bg-green-500 p-3 rounded-full text-white mb-4">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-800 text-center">Buat Akun Baru</h1>
+                    <p class="text-center text-slate-500 mt-2">Daftar sebagai siswa untuk melihat jadwal.</p>
+                </div>
+                <form id="register-form">
+                    <div class="mb-4">
+                        <input type="text" id="reg-username" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Username baru" required>
+                    </div>
+                    <div class="mb-4">
+                        <input type="password" id="reg-password" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Password baru" required>
+                    </div>
+                     <div class="mb-4">
+                        <input type="password" id="reg-confirm-password" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Konfirmasi password" required>
+                    </div>
+                    <div id="register-error" class="hidden text-red-500 text-sm mb-4 text-center font-medium"></div>
+                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 shadow-lg hover:shadow-green-500/50">Daftar</button>
+                </form>
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-slate-500">Sudah punya akun? 
+                        <button id="back-to-login-btn" class="text-indigo-600 hover:text-indigo-800 font-semibold">
+                            Login di sini
+                        </button>
+                    </p>
+                </div>
+             </div>
+        </div>
+
+        <!-- ===== HALAMAN JADWAL ===== -->
+        <div id="schedule-view" class="hidden w-full max-w-6xl fade-in">
+             <div class="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-6 md:p-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-slate-200 pb-5">
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-slate-800">Jadwal Pelajaran Kelas XII D</h1>
+                        <p id="welcome-message" class="text-slate-500 mt-1"></p>
+                    </div>
+                    <div class="flex items-center space-x-3 mt-4 md:mt-0">
+                        <button id="view-users-btn" class="hidden bg-sky-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-600 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-sky-500/50">
+                            <svg xmlns="http://www.w.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" /></svg>
+                             <span>Lihat Pengguna</span>
+                        </button>
+                        <button id="add-schedule-btn" class="hidden bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-green-500/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                            <span>Tambah Jadwal</span>
+                        </button>
+                        <button id="logout-btn" class="bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-lg hover:bg-slate-300 transition-colors duration-300 flex items-center space-x-2">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                           <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-transparent">
+                        <thead class="border-b-2 border-slate-200">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Hari</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Waktu</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Mata Pelajaran</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Guru</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Ruang</th>
+                                <th id="actions-header" class="hidden px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-table-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                     <div id="no-data" class="hidden text-center py-16 text-slate-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                        <p class="mt-4 font-semibold">Jadwal Masih Kosong</p>
+                        <p class="text-sm">Admin dapat menambahkan jadwal baru.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modals -->
+    <div id="schedule-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg modal-content">
+            <form id="schedule-form" class="p-8">
+                 <div class="flex items-center mb-6">
+                    <div class="bg-indigo-100 text-indigo-600 p-2 rounded-lg mr-4">
+                       <svg id="modal-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                    </div>
+                    <h2 id="modal-title" class="text-2xl font-bold text-slate-800">Tambah Jadwal Baru</h2>
+                </div>
+                <input type="hidden" id="edit-id">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="day" class="block text-sm font-medium text-slate-700">Hari</label>
+                        <select id="day" class="mt-1 block w-full py-2 px-3 border border-slate-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" required>
+                            <option>Senin</option><option>Selasa</option><option>Rabu</option><option>Kamis</option><option>Jumat</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="time" class="block text-sm font-medium text-slate-700">Waktu (cth: 07:00-08:30)</label>
+                        <input type="text" id="time" class="mt-1 block w-full border border-slate-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="subject" class="block text-sm font-medium text-slate-700">Mata Pelajaran</label>
+                        <input type="text" id="subject" class="mt-1 block w-full border border-slate-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" required>
+                    </div>
+                    <div>
+                        <label for="teacher" class="block text-sm font-medium text-slate-700">Nama Guru</label>
+                        <input type="text" id="teacher" class="mt-1 block w-full border border-slate-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" required>
+                    </div>
+                    <div>
+                        <label for="room" class="block text-sm font-medium text-slate-700">Ruang Kelas</label>
+                        <input type="text" id="room" class="mt-1 block w-full border border-slate-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" required>
+                    </div>
+                </div>
+                 <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" id="cancel-btn" class="bg-slate-200 text-slate-700 font-bold py-2.5 px-5 rounded-lg hover:bg-slate-300 transition">Batal</button>
+                    <button type="submit" class="bg-indigo-600 text-white font-bold py-2.5 px-5 rounded-lg hover:bg-indigo-700 transition">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="users-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl modal-content">
+            <div class="p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                         <div class="bg-sky-100 text-sky-600 p-2 rounded-lg mr-4">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800">Daftar Pengguna Terdaftar</h2>
+                    </div>
+                    <button type="button" id="close-users-modal-btn" class="text-slate-400 hover:text-slate-600">&times;</button>
+                </div>
+                <div class="overflow-y-auto max-h-96">
+                     <table class="min-w-full bg-transparent">
+                        <thead class="border-b-2 border-slate-200 sticky top-0 bg-white">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Username</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Peran</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="confirm-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 flex items-center justify-center p-4">
+         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 text-center modal-content">
+             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            </div>
+            <h3 id="confirm-title" class="text-lg font-medium text-slate-900">Hapus Data</h3>
+            <div class="mt-2"><p id="confirm-message" class="text-sm text-slate-500">Apakah Anda yakin? Tindakan ini tidak dapat dibatalkan.</p></div>
+            <div class="mt-6 flex justify-center space-x-3">
+                <button type="button" id="cancel-delete-btn" class="bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-lg hover:bg-slate-300 w-24 transition">Batal</button>
+                <button type="button" id="confirm-delete-btn" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 w-24 transition">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // === ELEMEN DOM ===
+    const loginView = document.getElementById('login-view');
+    const registerView = document.getElementById('register-view');
+    const scheduleView = document.getElementById('schedule-view');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const showRegisterBtn = document.getElementById('show-register-btn');
+    const backToLoginBtn = document.getElementById('back-to-login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const addScheduleBtn = document.getElementById('add-schedule-btn');
+    const viewUsersBtn = document.getElementById('view-users-btn');
+    const loginError = document.getElementById('login-error');
+    const registerError = document.getElementById('register-error');
+    const welcomeMessage = document.getElementById('welcome-message');
+    const scheduleTableBody = document.getElementById('schedule-table-body');
+    const actionsHeader = document.getElementById('actions-header');
+    const noData = document.getElementById('no-data');
+
+    // Modals
+    const scheduleModal = document.getElementById('schedule-modal');
+    const scheduleForm = document.getElementById('schedule-form');
+    const modalTitle = document.getElementById('modal-title');
+    const modalIcon = document.getElementById('modal-icon');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const editIdInput = document.getElementById('edit-id');
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmTitle = document.getElementById('confirm-title');
+    const confirmMessage = document.getElementById('confirm-message');
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    const usersModal = document.getElementById('users-modal');
+    const closeUsersModalBtn = document.getElementById('close-users-modal-btn');
+    const usersTableBody = document.getElementById('users-table-body');
+
+    // === STATE APLIKASI ===
+    let schedules = [];
+    let users = [];
+    let currentUser = null; 
+    let itemToDelete = null;
+    let itemDeleteType = ''; // 'schedule' or 'user'
+
+    // === DATA AWAL & FUNGSI PENYIMPANAN ===
+    const saveSchedules = () => localStorage.setItem('schoolSchedules', JSON.stringify(schedules));
+    const loadSchedules = () => {
+        const stored = localStorage.getItem('schoolSchedules');
+        const initialSchedules = [
+            { id: 1, day: 'Senin', time: '06:30 - 07:15', subject: 'Upacara Bendera', teacher: '-', room: 'Lapangan' },
+            { id: 2, day: 'Senin', time: '07:15 - 09:30', subject: 'Bahasa Indonesia', teacher: 'Gebi Juliani, S.Pd.', room: 'XII D' },
+            { id: 3, day: 'Senin', time: '09:45 - 12:00', subject: 'Informatika', teacher: 'Dodi Dharmanto, S.Kom.', room: 'XII D' },
+            { id: 4, day: 'Senin', time: '12:45 - 13:30', subject: 'Bimbingan Konseling', teacher: 'Abdurrohman, M.Si.', room: 'XII D' },
+            { id: 5, day: 'Senin', time: '13:30 - 15:00', subject: 'Geografi', teacher: 'Gustiana Jusuf, S.Pd.', room: 'XII D' },
+            { id: 6, day: 'Selasa', time: '06:30 - 08:00', subject: 'Bahasa Sunda', teacher: 'Noprihatin, S.Pd.', room: 'XII D' },
+            { id: 7, day: 'Selasa', time: '08:00 - 09:30', subject: 'Prakarya dan Kewirausahaan', teacher: 'Della Alvialfi, S.Pd.', room: 'XII D' },
+            { id: 8, day: 'Selasa', time: '09:45 - 10:30', subject: 'Sejarah', teacher: 'Marda Ismayadi, S.Pd.I.', room: 'XII D' },
+            { id: 9, day: 'Selasa', time: '10:30 - 11:15', subject: 'Sejarah', teacher: 'Marda Ismayadi, S.Pd.I.', room: 'XII D' },
+            { id: 10, day: 'Selasa', time: '11:15 - 12:00', subject: 'Bimbingan Konseling', teacher: 'Abdurrohman, M.Si.', room: 'XII D' },
+            { id: 11, day: 'Selasa', time: '12:45 - 14:15', subject: 'Bahasa Inggris', teacher: 'Hanna Sorita P., S.Pd.', room: 'XII D' },
+            { id: 12, day: 'Selasa', time: '14:15 - 15:00', subject: 'Pendidikan Pancasila', teacher: 'R. Chandra Gumiwa, S.Pd.', room: 'XII D' },
+            { id: 13, day: 'Rabu', time: '06:30 - 07:15', subject: 'Pendidikan Pancasila', teacher: 'R. Chandra Gumiwa, S.Pd.', room: 'XII D' },
+            { id: 14, day: 'Rabu', time: '07:15 - 08:00', subject: 'Informatika', teacher: 'Dodi Dharmanto, S.Kom.', room: 'XII D' },
+            { id: 15, day: 'Rabu', time: '08:00 - 08:45', subject: 'Informatika', teacher: 'Dodi Dharmanto, S.Kom.', room: 'XII D' },
+            { id: 16, day: 'Rabu', time: '09:00 - 10:30', subject: 'Fisika', teacher: 'Dadan Hamdani, S.Pd., M.Pd.', room: 'XII D' },
+            { id: 17, day: 'Rabu', time: '10:30 - 12:00', subject: 'Fisika', teacher: 'Dadan Hamdani, S.Pd., M.Pd.', room: 'XII D' },
+            { id: 18, day: 'Rabu', time: '12:45 - 15:00', subject: 'Geografi', teacher: 'Gustiana Jusuf, S.Pd.', room: 'XII D' },
+            { id: 19, day: 'Kamis', time: '06:30 - 08:00', subject: 'Fisika', teacher: 'Dadan Hamdani, S.Pd., M.Pd.', room: 'XII D' },
+            { id: 20, day: 'Kamis', time: '08:00 - 09:30', subject: 'Pendidikan Agama dan Budi Pekerti', teacher: 'Moh. Abdul Hadi, S.Ag.', room: 'XII D' },
+            { id: 21, day: 'Kamis', time: '09:45 - 11:15', subject: 'Biologi', teacher: 'Yanti Oktaviyani, S.Pd.', room: 'XII D' },
+            { id: 22, day: 'Kamis', time: '11:15 - 12:00', subject: 'Biologi', teacher: 'Yanti Oktaviyani, S.Pd.', room: 'XII D' },
+            { id: 23, day: 'Kamis', time: '12:45 - 14:15', subject: 'Matematika', teacher: 'Riza Hartati, S.Pt., M.Pd.', room: 'XII D' },
+            { id: 24, day: 'Kamis', time: '14:15 - 15:00', subject: 'Matematika', teacher: 'Riza Hartati, S.Pt., M.Pd.', room: 'XII D' },
+            { id: 25, day: 'Jumat', time: '06:30 - 07:50', subject: 'Prakarya dan Kewirausahaan', teacher: 'Ageng Eka Sagitta, M.E.', room: 'XII D' },
+            { id: 26, day: 'Jumat', time: '07:50 - 09:10', subject: 'Seni dan Budaya', teacher: 'Novi Pridamahaputra R., S.Pd.', room: 'XII D' },
+            { id: 27, day: 'Jumat', time: '09:25 - 10:45', subject: 'Seni dan Budaya', teacher: 'Novi Pridamahaputra R., S.Pd.', room: 'XII D' },
+            { id: 28, day: 'Jumat', time: '10:45 - 11:25', subject: 'Prakarya dan Kewirausahaan', teacher: 'Yanti Oktaviyani, S.Pd.', room: 'XII D' },
+            { id: 29, day: 'Jumat', time: '13:30 - 15:00', subject: 'Fisika', teacher: 'Dadan Hamdani, S.Pd., M.Pd.', room: 'XII D' },
+        ];
+        schedules = stored ? JSON.parse(stored) : initialSchedules;
+    };
+
+    const saveUsers = () => localStorage.setItem('schoolUsers', JSON.stringify(users));
+    const loadUsers = () => {
+        const stored = localStorage.getItem('schoolUsers');
+        const initialUsers = [{ username: 'admin', password: 'admin123', role: 'admin' }];
+        users = stored ? JSON.parse(stored) : initialUsers;
+    };
+
+    const showView = (viewId) => {
+        [loginView, registerView, scheduleView].forEach(view => view.classList.add('hidden'));
+        document.getElementById(viewId).classList.remove('hidden');
+    };
+
+    const setupViewForUser = () => {
+        if (!currentUser) return;
+        const isAdmin = currentUser.role === 'admin';
+        addScheduleBtn.classList.toggle('hidden', !isAdmin);
+        viewUsersBtn.classList.toggle('hidden', !isAdmin);
+        actionsHeader.classList.toggle('hidden', !isAdmin);
+        welcomeMessage.innerHTML = `Selamat datang, <span class="font-bold text-indigo-600">${currentUser.username}</span>! | Peran: <span class="font-semibold ${isAdmin ? 'text-green-600' : 'text-slate-600'}">${isAdmin ? 'Admin' : 'Siswa'}</span>`;
+        renderSchedules();
+    };
+    
+    const renderSchedules = () => {
+        scheduleTableBody.innerHTML = '';
+        noData.classList.toggle('hidden', schedules.length > 0);
+        const dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+        const sortedSchedules = [...schedules].sort((a, b) => {
+            const timeA = a.time.split('-')[0].trim();
+            const timeB = b.time.split('-')[0].trim();
+            if (dayOrder.indexOf(a.day) !== dayOrder.indexOf(b.day)) {
+                return dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day);
+            }
+            return timeA.localeCompare(timeB);
+        });
+        sortedSchedules.forEach(schedule => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-100/50 transition-colors';
+            row.innerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-800">${schedule.day}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-mono">${schedule.time}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 font-bold">${schedule.subject}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${schedule.teacher}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${schedule.room}</td>`;
+            if (currentUser && currentUser.role === 'admin') {
+                const actionsCell = document.createElement('td');
+                actionsCell.className = 'px-6 py-4 whitespace-nowrap text-sm font-medium';
+                actionsCell.innerHTML = `<div class="flex items-center space-x-4"><div class="tooltip"><button class="text-amber-500 hover:text-amber-700 edit-btn transition" data-id="${schedule.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button><span class="tooltip-text">Edit</span></div><div class="tooltip"><button class="text-red-500 hover:text-red-700 delete-btn transition" data-id="${schedule.id}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button><span class="tooltip-text">Hapus</span></div></div>`;
+                row.appendChild(actionsCell);
+            }
+            scheduleTableBody.appendChild(row);
+        });
+    };
+
+    const openModal = (mode, schedule = null) => {
+        scheduleForm.reset(); editIdInput.value = '';
+        if (mode === 'edit' && schedule) {
+            modalTitle.textContent = 'Edit Jadwal'; modalIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>`; editIdInput.value = schedule.id;
+            Object.keys(schedule).forEach(key => { if(document.getElementById(key)) document.getElementById(key).value = schedule[key]; });
+        } else {
+            modalTitle.textContent = 'Tambah Jadwal Baru'; modalIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>`;
+        }
+        scheduleModal.classList.remove('hidden');
+    };
+    
+    const closeModal = () => scheduleModal.classList.add('hidden');
+    
+    const openConfirmModal = (id, type) => {
+        itemToDelete = id; itemDeleteType = type;
+        if (type === 'user') {
+            confirmTitle.textContent = 'Hapus Pengguna';
+            confirmMessage.textContent = `Anda yakin ingin menghapus pengguna "${id}"? Tindakan ini tidak dapat dibatalkan.`;
+        } else {
+            confirmTitle.textContent = 'Hapus Jadwal';
+            confirmMessage.textContent = 'Apakah Anda yakin? Tindakan ini tidak dapat dibatalkan.';
+        }
+        confirmModal.classList.remove('hidden');
+    }
+
+    const closeConfirmModal = () => {
+        itemToDelete = null; itemDeleteType = ''; confirmModal.classList.add('hidden');
+    }
+
+    const renderUsersList = () => {
+        usersTableBody.innerHTML = '';
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-100/50';
+            const roleClass = user.role === 'admin' ? 'text-green-600 font-semibold' : 'text-slate-500';
+            row.innerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">${user.username}</td><td class="px-6 py-4 whitespace-nowrap text-sm ${roleClass}">${user.role}</td><td class="px-6 py-4"></td>`;
+            if (user.role !== 'admin') {
+                const deleteBtnCell = row.cells[2];
+                deleteBtnCell.innerHTML = `<div class="tooltip"><button class="text-red-500 hover:text-red-700 delete-user-btn transition" data-username="${user.username}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button><span class="tooltip-text">Hapus User</span></div>`;
+            }
+            usersTableBody.appendChild(row);
+        });
+    };
+
+    showRegisterBtn.addEventListener('click', () => showView('register-view'));
+    backToLoginBtn.addEventListener('click', () => showView('login-view'));
+    
+    registerForm.addEventListener('submit', (e) => {
+        e.preventDefault(); registerError.classList.add('hidden');
+        const username = document.getElementById('reg-username').value;
+        const pass = document.getElementById('reg-password').value;
+        const confirmPass = document.getElementById('reg-confirm-password').value;
+        if (pass !== confirmPass) {
+            registerError.textContent = "Password dan konfirmasi tidak cocok!"; registerError.classList.remove('hidden'); return;
+        }
+        if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+            registerError.textContent = "Username sudah digunakan!"; registerError.classList.remove('hidden'); return;
+        }
+        users.push({ username, password: pass, role: 'student' });
+        saveUsers(); registerForm.reset();
+        alert('Registrasi berhasil! Silakan login.');
+        showView('login-view');
+    });
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault(); loginError.classList.add('hidden');
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const user = users.find(u => u.username === username && u.password === password);
+        if (user) {
+            currentUser = user; setupViewForUser(); showView('schedule-view'); loginForm.reset();
+        } else {
+            loginError.classList.remove('hidden');
+        }
+    });
+
+    logoutBtn.addEventListener('click', () => { currentUser = null; showView('login-view'); });
+    addScheduleBtn.addEventListener('click', () => openModal('add'));
+    cancelBtn.addEventListener('click', closeModal);
+    cancelDeleteBtn.addEventListener('click', closeConfirmModal);
+
+    viewUsersBtn.addEventListener('click', () => {
+        renderUsersList();
+        usersModal.classList.remove('hidden');
+    });
+    closeUsersModalBtn.addEventListener('click', () => usersModal.classList.add('hidden'));
+
+    scheduleForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const scheduleData = {
+            day: document.getElementById('day').value, time: document.getElementById('time').value,
+            subject: document.getElementById('subject').value, teacher: document.getElementById('teacher').value,
+            room: document.getElementById('room').value,
+        };
+        if (editIdInput.value) {
+            const id = parseInt(editIdInput.value);
+            schedules = schedules.map(s => s.id === id ? { ...scheduleData, id } : s);
+        } else {
+            scheduleData.id = Date.now();
+            schedules.push(scheduleData);
+        }
+        saveSchedules(); renderSchedules(); closeModal();
+    });
+
+    scheduleTableBody.addEventListener('click', (e) => {
+        const btn = e.target.closest('button'); if (!btn) return;
+        const id = parseInt(btn.dataset.id);
+        if (btn.classList.contains('edit-btn')) {
+            const scheduleToEdit = schedules.find(s => s.id === id);
+            openModal('edit', scheduleToEdit);
+        }
+        if (btn.classList.contains('delete-btn')) {
+            openConfirmModal(id, 'schedule');
+        }
+    });
+
+    usersTableBody.addEventListener('click', (e) => {
+        const btn = e.target.closest('button.delete-user-btn');
+        if (btn) {
+            const username = btn.dataset.username;
+            openConfirmModal(username, 'user');
+        }
+    });
+    
+    confirmDeleteBtn.addEventListener('click', () => {
+        if (itemDeleteType === 'schedule') {
+            schedules = schedules.filter(s => s.id !== itemToDelete);
+            saveSchedules();
+            renderSchedules();
+        } else if (itemDeleteType === 'user') {
+            users = users.filter(u => u.username !== itemToDelete);
+            saveUsers();
+            renderUsersList();
+        }
+        closeConfirmModal();
+    });
+
+    const init = () => {
+        loadSchedules(); loadUsers(); showView('login-view');
+    };
+
+    init();
+});
+</script>
+
+</body>
+</html>
+
