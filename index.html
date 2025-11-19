@@ -9,7 +9,11 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background-image: url('https://images.pexels.com/photos/207692/pexels-photo-207692.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -38,6 +42,39 @@
             left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 12px;
         }
         .tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+        #teacher-subject-container, #class-selection-container {
+             transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin 0.3s ease-out;
+             overflow: hidden;
+        }
+        
+        /* --- FAB Styles --- */
+        .fab-option {
+            transition: all 0.3s ease-out;
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+        .fab-option.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        #fab-toggle.open svg#fab-icon-plus {
+            transform: rotate(45deg);
+        }
+        #fab-toggle.open svg#fab-icon-close {
+            transform: rotate(0);
+            opacity: 1;
+        }
+        #fab-toggle svg {
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            position: absolute;
+        }
+        #fab-toggle svg#fab-icon-close {
+            transform: rotate(-45deg);
+            opacity: 0;
+        }
     </style>
 </head>
 <body class="text-slate-800">
@@ -45,7 +82,7 @@
     <div id="app-container" class="container mx-auto p-4 min-h-screen flex items-center justify-center">
 
         <div id="login-view" class="w-full max-w-md fade-in">
-            <div class="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-8">
+             <div class="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-8">
                 <div class="flex flex-col items-center mb-6">
                      <div class="bg-indigo-500 p-3 rounded-full text-white mb-4">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
@@ -55,11 +92,11 @@
                 </div>
                 <form id="login-form">
                     <div class="mb-4"><input type="text" id="username" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Username" required></div>
-                    <div class="mb-2 relative">
+                    <div class="mb-4 relative"> 
                         <input type="password" id="password" class="w-full pl-4 pr-10 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Password" required>
                         <button type="button" class="toggle-password absolute inset-y-0 right-0 px-3 flex items-center text-slate-500 hover:text-slate-700" data-target="password"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
                     </div>
-                    <div class="text-right text-sm mb-4"><button type="button" id="show-forgot-password-btn" class="text-indigo-600 hover:text-indigo-800 font-semibold">Lupa Password?</button></div>
+                    
                     <div id="login-error" class="hidden text-red-500 text-sm mb-4 text-center font-medium">Username atau password salah!</div>
                     <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 shadow-lg hover:shadow-indigo-500/50">Login</button>
                 </form>
@@ -91,18 +128,11 @@
                             <option value="12 J">12 J</option> <option value="12 K">12 K</option> <option value="12 L">12 L</option>
                         </select>
                     </div>
-                    <div class="mb-4"><input type="text" id="reg-username" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Username baru" required></div>
-                     <div class="mb-4">
-                        <label for="reg-question" class="block text-sm font-medium text-slate-700 mb-1">Pertanyaan Rahasia</label>
-                        <select id="reg-question" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500" required>
-                            <option value="" disabled selected>-- Pilih Pertanyaan --</option>
-                            <option value="Siapa nama hewan peliharaan pertama Anda?">Siapa nama hewan peliharaan pertama Anda?</option>
-                            <option value="Apa nama sekolah dasar Anda?">Apa nama sekolah dasar Anda?</option>
-                            <option value="Apa makanan favorit Anda?">Apa makanan favorit Anda?</option>
-                            <option value="Di kota mana Anda lahir?">Di kota mana Anda lahir?</option>
-                        </select>
+                    <div id="teacher-subject-container" class="mb-4 overflow-hidden">
+                        <label for="reg-subject" class="block text-sm font-medium text-slate-700 mb-1">Mata Pelajaran yang Diajar</label>
+                        <input type="text" id="reg-subject" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="cth: Matematika">
                     </div>
-                     <div class="mb-4"><input type="text" id="reg-secret" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Jawaban Rahasia" required></div>
+                    <div class="mb-4"><input type="text" id="reg-username" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Username baru" required></div>
                     <div class="mb-4 relative">
                         <input type="password" id="reg-password" class="w-full pl-4 pr-10 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Password baru" required>
                         <button type="button" class="toggle-password absolute inset-y-0 right-0 px-3 flex items-center text-slate-500 hover:text-slate-700" data-target="reg-password"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
@@ -117,41 +147,9 @@
                 <div class="mt-6 text-center"><p class="text-sm text-slate-500">Sudah punya akun? <button id="back-to-login-btn-from-register" class="text-indigo-600 hover:text-indigo-800 font-semibold">Login di sini</button></p></div>
              </div>
         </div>
-        <div id="forgot-password-view" class="hidden w-full max-w-md fade-in">
-             <div class="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-8">
-                <div class="flex flex-col items-center mb-6">
-                    <div class="bg-amber-500 p-3 rounded-full text-white mb-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg></div>
-                    <h1 class="text-3xl font-extrabold text-slate-800 text-center">Reset Password</h1>
-                </div>
-                <form id="forgot-password-form">
-                    <div id="forgot-step-1">
-                        <p class="text-center text-slate-500 mb-4">Masukkan username Anda untuk memulai.</p>
-                        <input type="text" id="forgot-username" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Username" required>
-                        <button type="submit" class="mt-4 w-full bg-amber-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-amber-700 transition">Lanjutkan</button>
-                    </div>
-                    <div id="forgot-step-2" class="hidden">
-                         <p class="text-center text-slate-500 mb-2">Jawab pertanyaan rahasia Anda:</p>
-                         <p id="forgot-question-display" class="text-center font-semibold text-slate-700 mb-4"></p>
-                        <input type="text" id="forgot-secret" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Jawaban Rahasia" required>
-                        <button type="submit" class="mt-4 w-full bg-amber-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-amber-700 transition">Verifikasi</button>
-                    </div>
-                    <div id="forgot-step-3" class="hidden">
-                         <p class="text-center text-slate-500 mb-4">Masukkan password baru Anda.</p>
-                        <div class="mb-4 relative">
-                            <input type="password" id="forgot-new-password" class="w-full pl-4 pr-10 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Password Baru" required>
-                            <button type="button" class="toggle-password absolute inset-y-0 right-0 px-3 flex items-center text-slate-500 hover:text-slate-700" data-target="forgot-new-password"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
-                        </div>
-                        <input type="password" id="forgot-confirm-password" class="w-full px-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Konfirmasi Password Baru" required>
-                        <button type="submit" class="mt-4 w-full bg-amber-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-amber-700 transition">Reset Password</button>
-                    </div>
-                    <div id="forgot-error" class="hidden text-red-500 text-sm mt-4 text-center font-medium"></div>
-                </form>
-                 <div class="mt-6 text-center"><p class="text-sm text-slate-500">Ingat password Anda? <button id="back-to-login-btn-from-forgot" class="text-indigo-600 hover:text-indigo-800 font-semibold">Kembali ke Login</button></p></div>
-             </div>
-        </div>
         
         <div id="class-selection-view" class="hidden w-full max-w-4xl fade-in">
-            <div class="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-6 md:p-8">
+             <div class="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-6 md:p-8">
                  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-slate-200 pb-5">
                     <div>
                         <h1 class="text-3xl font-extrabold text-slate-800">Pilih Kelas</h1>
@@ -165,6 +163,17 @@
                     </div>
                 </div>
                 <div id="class-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+                 <div class="mt-8 pt-6 border-t border-slate-200">
+                    <h3 class="text-lg font-semibold text-slate-700 mb-3">Tambah Kelas Baru</h3>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="text" id="new-class-name" class="flex-grow px-4 py-2 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Nama Kelas Baru (cth: Kelas Olimpiade)">
+                        <button id="add-new-class-btn" class="bg-indigo-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-600 transition flex items-center justify-center space-x-2">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                           <span>Tambah</span>
+                        </button>
+                    </div>
+                     <p id="add-class-error" class="hidden text-red-500 text-sm mt-2"></p>
+                </div>
             </div>
         </div>
 
@@ -196,21 +205,62 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" /></svg>
                              <span>Lihat Pengguna</span>
                         </button>
-                        <button id="add-schedule-btn" class="hidden bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-green-500/50">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                            <span>Tambah Jadwal</span>
-                        </button>
                         <button id="logout-btn" class="bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-lg hover:bg-slate-300 transition-colors duration-300 flex items-center space-x-2">
                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                            <span>Logout</span>
                         </button>
                     </div>
                 </div>
-                <div id="schedule-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-                <div id="no-data" class="hidden text-center py-16 text-slate-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
-                    <p class="mt-4 font-semibold">Jadwal Masih Kosong</p>
-                    <p class="text-sm">Admin dapat menambahkan jadwal baru untuk kelas ini.</p>
+                 <div id="schedule-container-wrapper" class="space-y-6">
+                    <div id="image-schedule-container" class="hidden">
+                        <h2 class="text-2xl font-bold text-slate-700 mb-4">Jadwal Gambar</h2>
+                        <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-md p-4 flex justify-center items-center relative">
+                            <img id="schedule-image-display" src="" alt="Jadwal Gambar" class="max-w-full max-h-[80vh] rounded-lg">
+                            <button id="delete-image-schedule-btn" class="hidden absolute top-2 right-2 bg-red-600 text-white rounded-full p-2 shadow-lg hover:bg-red-700 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="text-schedule-container">
+                        <h2 id="text-schedule-title" class="text-2xl font-bold text-slate-700 mb-4">Jadwal Teks</h2>
+                        <div id="schedule-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                        <div id="no-data" class="hidden text-center py-16 text-slate-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                            <p class="mt-4 font-semibold">Jadwal Teks Masih Kosong</p>
+                            <p class="text-sm">Admin dapat menambahkan atau mengupload jadwal baru untuk kelas ini.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="fab-container" class="hidden fixed bottom-8 right-8 z-20 flex flex-col items-center">
+                    <button id="fab-upload-text" class="fab-option mb-3 w-48 h-12 bg-teal-500 text-white rounded-lg shadow-lg flex items-center justify-center transition-all transform hover:bg-teal-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        <span class="ml-2 text-sm font-semibold">Upload Teks/File</span>
+                    </button>
+                    <button id="fab-upload-image" class="fab-option mb-3 w-48 h-12 bg-pink-500 text-white rounded-lg shadow-lg flex items-center justify-center transition-all transform hover:bg-pink-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l-1.586-1.586a2 2 0 00-2.828 0L6 14m6-6l.01.01" />
+                        </svg>
+                        <span class="ml-2 text-sm font-semibold">Upload Gambar</span>
+                    </button>
+                    <button id="fab-add-manual" class="fab-option mb-3 w-48 h-12 bg-green-500 text-white rounded-lg shadow-lg flex items-center justify-center transition-all transform hover:bg-green-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="ml-2 text-sm font-semibold">Tambah Manual</span>
+                    </button>
+                    <button id="fab-toggle" class="w-16 h-16 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center transition-transform duration-300 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 relative">
+                        <svg id="fab-icon-plus" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <svg id="fab-icon-close" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -258,7 +308,7 @@
         </div>
     </div>
     <div id="users-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl modal-content">
+         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl modal-content">
             <div class="p-8">
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center">
@@ -272,7 +322,7 @@
                         <thead class="border-b-2 border-slate-200 sticky top-0 bg-white">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Username</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Kelas</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Kelas/Mapel</th>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Peran</th>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
                             </tr>
@@ -284,7 +334,7 @@
         </div>
     </div>
     <div id="confirm-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 flex items-center justify-center p-4">
-         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 text-center modal-content">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 text-center modal-content">
              <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4"><svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></div>
             <h3 id="confirm-title" class="text-lg font-medium text-slate-900">Hapus Data</h3>
             <div class="mt-2"><p id="confirm-message" class="text-sm text-slate-500">Apakah Anda yakin? Tindakan ini tidak dapat dibatalkan.</p></div>
@@ -357,6 +407,56 @@
             </div>
         </div>
     </div>
+    <div id="upload-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl modal-content">
+            <div class="p-8">
+                <div class="flex items-center mb-6">
+                     <div class="bg-teal-100 text-teal-600 p-2 rounded-lg mr-4">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">Upload Jadwal (File)</h2>
+                </div>
+                 <p class="text-sm text-slate-500 mb-4">Upload jadwal baru untuk kelas <strong id="upload-modal-classname" class="text-teal-600"></strong>. Format file (.txt atau .csv) per baris: <code class="bg-slate-100 px-1 rounded text-xs">Hari,Waktu,Mapel,Guru,Ruang</code>. Jadwal lama akan diganti.</p>
+                 
+                 <div class="mb-6">
+                    <label for="upload-file" class="block text-sm font-medium text-slate-700 mb-1">Unggah File (.txt / .csv):</label>
+                     <input type="file" id="upload-file" accept=".txt,.csv" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 cursor-pointer">
+                     <p id="file-name-display" class="text-xs text-slate-500 mt-1"></p>
+                </div>
+                <div id="upload-error" class="hidden text-red-500 text-sm mb-4 text-center font-medium"></div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="close-upload-modal-btn" class="bg-slate-200 text-slate-700 font-bold py-2.5 px-5 rounded-lg hover:bg-slate-300 transition">Batal</button>
+                    <button type="button" id="process-upload-btn" class="bg-teal-600 text-white font-bold py-2.5 px-5 rounded-lg hover:bg-teal-700 transition">Proses Jadwal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="upload-image-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl modal-content">
+            <div class="p-8">
+                <div class="flex items-center mb-6">
+                     <div class="bg-pink-100 text-pink-600 p-2 rounded-lg mr-4">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l-1.586-1.586a2 2 0 00-2.828 0L6 14m6-6l.01.01" />
+                       </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">Upload Jadwal Gambar</h2>
+                </div>
+                 <p class="text-sm text-slate-500 mb-4">Upload jadwal dalam bentuk gambar (JPG/PNG) untuk kelas <strong id="upload-image-modal-classname" class="text-pink-600"></strong>. Ini akan menggantikan jadwal gambar yang ada.</p>
+                 
+                 <div class="mb-6">
+                    <label for="upload-image-file" class="block text-sm font-medium text-slate-700 mb-1">Unggah Gambar (.jpg / .png):</label>
+                     <input type="file" id="upload-image-file" accept="image/jpeg,image/png" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100 cursor-pointer">
+                     <p id="image-file-name-display" class="text-xs text-slate-500 mt-1"></p>
+                </div>
+                <div id="upload-image-error" class="hidden text-red-500 text-sm mb-4 text-center font-medium"></div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="close-upload-image-modal-btn" class="bg-slate-200 text-slate-700 font-bold py-2.5 px-5 rounded-lg hover:bg-slate-300 transition">Batal</button>
+                    <button type="button" id="process-upload-image-btn" class="bg-pink-600 text-white font-bold py-2.5 px-5 rounded-lg hover:bg-pink-700 transition">Upload Gambar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 <script>
@@ -364,26 +464,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // === DOM ELEMENTS ===
     const loginView = document.getElementById('login-view');
     const registerView = document.getElementById('register-view');
-    const forgotPasswordView = document.getElementById('forgot-password-view');
     const classSelectionView = document.getElementById('class-selection-view');
     const scheduleView = document.getElementById('schedule-view');
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
-    const forgotPasswordForm = document.getElementById('forgot-password-form');
     const showRegisterBtn = document.getElementById('show-register-btn');
     const backToLoginBtnRegister = document.getElementById('back-to-login-btn-from-register');
-    const backToLoginBtnForgot = document.getElementById('back-to-login-btn-from-forgot');
-    const showForgotPasswordBtn = document.getElementById('show-forgot-password-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const classSelectionLogoutBtn = document.getElementById('class-selection-logout-btn');
     const backToClassSelectionBtn = document.getElementById('back-to-class-selection-btn');
     const togglePasswordBtns = document.querySelectorAll('.toggle-password');
     const loginError = document.getElementById('login-error');
     const registerError = document.getElementById('register-error');
-    const forgotError = document.getElementById('forgot-error');
     const welcomeMessage = document.getElementById('welcome-message');
     const scheduleViewTitle = document.getElementById('schedule-view-title');
-    const addScheduleBtn = document.getElementById('add-schedule-btn');
     const viewUsersBtn = document.getElementById('view-users-btn');
     const classGrid = document.getElementById('class-grid');
     const classSelectionWelcome = document.getElementById('class-selection-welcome');
@@ -391,9 +485,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const roleOptions = document.querySelectorAll('.role-option');
     const classSelectionContainer = document.getElementById('class-selection-container');
     const regClassSelect = document.getElementById('reg-class');
-    const forgotStep1 = document.getElementById('forgot-step-1');
-    const forgotStep2 = document.getElementById('forgot-step-2');
-    const forgotStep3 = document.getElementById('forgot-step-3');
     const scheduleCardsContainer = document.getElementById('schedule-cards-container');
     const noData = document.getElementById('no-data');
     const scheduleModal = document.getElementById('schedule-modal');
@@ -421,38 +512,116 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewSuggestionsModal = document.getElementById('view-suggestions-modal');
     const closeViewSuggestionsModalBtn = document.getElementById('close-view-suggestions-modal-btn');
     const suggestionsListContainer = document.getElementById('suggestions-list-container');
+    const addNewClassBtn = document.getElementById('add-new-class-btn');
+    const newClassNameInput = document.getElementById('new-class-name');
+    const addClassError = document.getElementById('add-class-error');
+    const uploadModal = document.getElementById('upload-modal');
+    const closeUploadModalBtn = document.getElementById('close-upload-modal-btn');
+    const uploadFile = document.getElementById('upload-file');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const processUploadBtn = document.getElementById('process-upload-btn');
+    const uploadError = document.getElementById('upload-error');
+    const uploadModalClassname = document.getElementById('upload-modal-classname');
+    const teacherSubjectContainer = document.getElementById('teacher-subject-container');
+    const regSubjectInput = document.getElementById('reg-subject');
+    
+    // --- FAB Elements ---
+    const fabContainer = document.getElementById('fab-container');
+    const fabToggle = document.getElementById('fab-toggle');
+    const fabUploadText = document.getElementById('fab-upload-text');
+    const fabUploadImage = document.getElementById('fab-upload-image');
+    const fabAddManual = document.getElementById('fab-add-manual');
+    
+    // --- Image Schedule Elements ---
+    const imageScheduleContainer = document.getElementById('image-schedule-container');
+    const scheduleImageDisplay = document.getElementById('schedule-image-display');
+    const deleteImageScheduleBtn = document.getElementById('delete-image-schedule-btn');
+    const textScheduleContainer = document.getElementById('text-schedule-container');
+    const textScheduleTitle = document.getElementById('text-schedule-title');
+    const uploadImageModal = document.getElementById('upload-image-modal');
+    const uploadImageModalClassname = document.getElementById('upload-image-modal-classname');
+    const uploadImageFile = document.getElementById('upload-image-file');
+    const imageFileNameDisplay = document.getElementById('image-file-name-display');
+    const uploadImageError = document.getElementById('upload-image-error');
+    const closeUploadImageModalBtn = document.getElementById('close-upload-image-modal-btn');
+    const processUploadImageBtn = document.getElementById('process-upload-image-btn');
     
     let schedulesByClass = {};
+    let imageSchedulesByClass = {}; // --- State Baru untuk Jadwal Gambar ---
     let users = [];
     let suggestions = [];
+    let customClasses = [];
     let currentUser = null; 
     let currentSelectedClass = null;
-    let userToReset = null;
     let itemToDelete = null;
     let itemDeleteType = '';
+    let uploadedFileContent = null;
+    let uploadedImageFileContent = null; // --- State Baru untuk File Gambar ---
 
     const saveSchedules = () => localStorage.setItem('schoolSchedulesByClass', JSON.stringify(schedulesByClass));
-    const loadSchedules = () => { schedulesByClass = JSON.parse(localStorage.getItem('schoolSchedulesByClass') || '{}'); };
+    const loadSchedules = () => {
+        try { schedulesByClass = JSON.parse(localStorage.getItem('schoolSchedulesByClass') || '{}'); } 
+        catch (e) { schedulesByClass = {}; }
+    };
+     const saveImageSchedules = () => localStorage.setItem('schoolImageSchedules', JSON.stringify(imageSchedulesByClass));
+    const loadImageSchedules = () => {
+        try { imageSchedulesByClass = JSON.parse(localStorage.getItem('schoolImageSchedules') || '{}'); } 
+        catch (e) { imageSchedulesByClass = {}; }
+    };
     const saveUsers = () => localStorage.setItem('schoolUsers', JSON.stringify(users));
-    const loadUsers = () => {
-        const stored = localStorage.getItem('schoolUsers');
-        let loadedUsers = stored ? JSON.parse(stored) : [];
+     const loadUsers = () => {
+        let loadedUsers = [];
+        try {
+            const stored = localStorage.getItem('schoolUsers');
+            if (stored) loadedUsers = JSON.parse(stored);
+        } catch(e) { loadedUsers = []; }
+        
         const adminUserIndex = loadedUsers.findIndex(u => u.username === 'admin');
-        const adminData = { username: 'admin', password: 'admin123', role: 'admin', secretQuestion: 'Apa makanan favorit Anda?', secret: 'adminsecret' };
+        const adminData = { username: 'admin', password: 'admin123', role: 'admin' }; 
         if (adminUserIndex > -1) {
-            loadedUsers[adminUserIndex] = { ...loadedUsers[adminUserIndex], ...adminData };
+             let existingAdmin = loadedUsers[adminUserIndex];
+             delete existingAdmin.secretQuestion; 
+             delete existingAdmin.secret; 
+             loadedUsers[adminUserIndex] = { ...existingAdmin, ...adminData };
         } else {
             loadedUsers.push(adminData);
         }
-        users = loadedUsers;
-        saveUsers();
+        
+        const newAdminUserIndex = loadedUsers.findIndex(u => u.username === 'AdminV1');
+        const newAdminData = { username: 'AdminV1', password: 'Admin321', role: 'admin' };
+        if (newAdminUserIndex > -1) {
+            let existingAdminV1 = loadedUsers[newAdminUserIndex];
+            delete existingAdminV1.secretQuestion;
+            delete existingAdminV1.secret;
+            loadedUsers[newAdminUserIndex] = { ...existingAdminV1, ...newAdminData };
+        } else {
+            loadedUsers.push(newAdminData);
+        }
+
+        users = loadedUsers.map(user => {
+            delete user.secretQuestion;
+            delete user.secret;
+            return user;
+        });
+        saveUsers(); 
     };
     const saveSuggestions = () => localStorage.setItem('schoolSuggestions', JSON.stringify(suggestions));
-    const loadSuggestions = () => { suggestions = JSON.parse(localStorage.getItem('schoolSuggestions') || '[]'); };
+    const loadSuggestions = () => {
+        try { suggestions = JSON.parse(localStorage.getItem('schoolSuggestions') || '[]'); } 
+        catch (e) { suggestions = []; }
+    };
+    const saveCustomClasses = () => localStorage.setItem('schoolCustomClasses', JSON.stringify(customClasses));
+    const loadCustomClasses = () => {
+        try { customClasses = JSON.parse(localStorage.getItem('schoolCustomClasses') || '[]'); } 
+        catch (e) { customClasses = []; }
+    };
 
     const showView = (viewId) => {
-        [loginView, registerView, scheduleView, forgotPasswordView, classSelectionView].forEach(v => v.classList.add('hidden'));
-        document.getElementById(viewId).classList.remove('hidden');
+        [loginView, registerView, scheduleView, classSelectionView].forEach(v => {
+            if (v) v.classList.add('hidden');
+        });
+        const viewToShow = document.getElementById(viewId);
+        if (viewToShow) viewToShow.classList.remove('hidden');
     };
 
     const setupViewForUser = () => {
@@ -471,12 +640,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const renderClassSelection = () => {
         classGrid.innerHTML = '';
-        const classes = "ABCDEFGHIJKL".split('');
-        classes.forEach(c => {
+        const defaultClasses = "ABCDEFGHIJKL".split('').map(c => `12 ${c}`);
+        const subjectClasses = [
+            "Kelas Matematika", "Kelas Biologi", "Kelas Fisika", "Kelas Kimia", 
+            "Kelas Sejarah", "Kelas Geografi", "Kelas Ekonomi", 
+            "Kelas B. Indonesia", "Kelas B. Inggris"
+        ];
+        const allClasses = [...defaultClasses, ...subjectClasses, ...customClasses].sort(); 
+
+        allClasses.forEach(className => {
             const btn = document.createElement('button');
             btn.className = 'p-4 bg-white rounded-lg shadow hover:bg-indigo-500 hover:text-white hover:shadow-lg transition-all transform hover:-translate-y-1';
-            btn.innerHTML = `<span class="text-2xl font-bold">12 ${c}</span>`;
-            btn.dataset.className = `12 ${c}`;
+            btn.innerHTML = `<span class="text-xl font-bold">${className}</span>`;
+            btn.dataset.className = className;
             btn.addEventListener('click', () => {
                 currentSelectedClass = btn.dataset.className;
                 renderSchedules();
@@ -486,15 +662,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const addCustomClass = () => {
+        addClassError.classList.add('hidden');
+        const newName = newClassNameInput.value.trim();
+        if (!newName) {
+            addClassError.textContent = "Nama kelas tidak boleh kosong.";
+            addClassError.classList.remove('hidden');
+            return;
+        }
+        const defaultClasses = "ABCDEFGHIJKL".split('').map(c => `12 ${c}`);
+        const subjectClasses = [
+            "Kelas Matematika", "Kelas Biologi", "Kelas Fisika", "Kelas Kimia", 
+            "Kelas Sejarah", "Kelas Geografi", "Kelas Ekonomi", 
+            "Kelas B. Indonesia", "Kelas B. Inggris"
+        ];
+        if ([...defaultClasses, ...subjectClasses, ...customClasses].map(c => c.toLowerCase()).includes(newName.toLowerCase())) {
+             addClassError.textContent = "Nama kelas sudah ada.";
+            addClassError.classList.remove('hidden');
+            return;
+        }
+        customClasses.push(newName);
+        saveCustomClasses();
+        renderClassSelection(); 
+        newClassNameInput.value = ''; 
+    };
+
     const renderSchedules = () => {
         scheduleCardsContainer.innerHTML = '';
+        imageScheduleContainer.classList.add('hidden'); 
+        
         scheduleViewTitle.textContent = `Jadwal Pelajaran Kelas ${currentSelectedClass}`;
         const isAdmin = currentUser.role === 'admin';
-        const isStudent = currentUser.role === 'student';
-        addScheduleBtn.classList.toggle('hidden', !isAdmin);
-        viewUsersBtn.classList.toggle('hidden', !isAdmin);
-        viewSuggestionsBtn.classList.toggle('hidden', !isAdmin);
-        backToClassSelectionBtn.classList.toggle('hidden', isStudent);
+        const isTeacher = currentUser.role === 'teacher';
+        const isStudent = currentUser.role === 'student'; 
+
+        fabContainer.classList.toggle('hidden', isStudent); 
+        fabAddManual.classList.toggle('hidden', !isAdmin); 
+        fabUploadText.classList.toggle('hidden', !(isAdmin || isTeacher)); 
+        fabUploadImage.classList.toggle('hidden', !(isAdmin || isTeacher)); 
+        
+        viewUsersBtn.classList.toggle('hidden', !isAdmin); 
+        viewSuggestionsBtn.classList.toggle('hidden', !isAdmin); 
+        backToClassSelectionBtn.classList.toggle('hidden', isStudent); 
+        
+        giveSuggestionBtn.classList.toggle('hidden', isAdmin); 
+        
         let welcomeHTML = `Selamat datang, <span class="font-bold text-indigo-600">${currentUser.username}</span>!`;
         if (isStudent) { welcomeHTML += ` | Kelas: <span class="font-semibold text-slate-600">${currentUser.className}</span>`; }
         let roleText, roleClass;
@@ -505,8 +717,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         welcomeHTML += ` | Peran: <span class="font-semibold ${roleClass}">${roleText}</span>`;
         welcomeMessage.innerHTML = welcomeHTML;
+        
+        // --- Render Jadwal Gambar ---
+        const imageSchedule = imageSchedulesByClass[currentSelectedClass];
+        if (imageSchedule) {
+            scheduleImageDisplay.src = imageSchedule;
+            imageScheduleContainer.classList.remove('hidden');
+            deleteImageScheduleBtn.classList.toggle('hidden', !isAdmin);
+            textScheduleTitle.textContent = "Jadwal Teks (Tambahan)"; // Ubah judul jika ada gambar
+        } else {
+             textScheduleTitle.textContent = "Jadwal Teks"; // Judul normal
+        }
+
+        // --- Render Jadwal Teks ---
         const classSchedules = schedulesByClass[currentSelectedClass] || [];
-        noData.classList.toggle('hidden', classSchedules.length > 0);
+        noData.classList.toggle('hidden', classSchedules.length > 0 || imageSchedule); // Sembunyikan jika ada jadwal teks ATAU gambar
+        textScheduleContainer.classList.toggle('hidden', classSchedules.length === 0 && imageSchedule); // Sembunyikan jadwal teks jika kosong TAPI ada gambar
+        
         const schedulesByDay = classSchedules.reduce((acc, schedule) => {
             if (!acc[schedule.day]) acc[schedule.day] = [];
             acc[schedule.day].push(schedule);
@@ -548,7 +775,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         scheduleModal.classList.remove('hidden');
     };
-    const closeModal = () => scheduleModal.classList.add('hidden');
     
     const renderUsersList = () => {
         usersTableBody.innerHTML = '';
@@ -561,7 +787,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'teacher': roleText = 'Guru'; roleClass = 'text-sky-600'; break;
                 default: roleText = 'Siswa'; roleClass = 'text-slate-500';
             }
-            row.innerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">${user.username}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${user.className || '-'}</td><td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${roleClass}">${roleText}</td><td class="px-6 py-4"></td>`;
+            const classOrSubject = user.className || (user.subject || '-'); 
+            row.innerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">${user.username}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${classOrSubject}</td><td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${roleClass}">${roleText}</td><td class="px-6 py-4"></td>`;
             if (user.role !== 'admin') {
                 const deleteBtnCell = row.cells[3];
                 deleteBtnCell.innerHTML = `<div class="tooltip"><button class="text-red-500 hover:text-red-700 delete-user-btn transition" data-username="${user.username}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button><span class="tooltip-text">Hapus User</span></div>`;
@@ -600,9 +827,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (type === 'suggestion') {
              confirmTitle.textContent = 'Hapus Saran';
             confirmMessage.textContent = 'Apakah Anda yakin ingin menghapus saran ini?';
-        } else {
+        } else if (type === 'schedule') {
             confirmTitle.textContent = 'Hapus Jadwal';
             confirmMessage.textContent = 'Apakah Anda yakin? Tindakan ini tidak dapat dibatalkan.';
+        } else if (type === 'imageSchedule') {
+            confirmTitle.textContent = 'Hapus Jadwal Gambar';
+            confirmMessage.textContent = 'Anda yakin ingin menghapus jadwal gambar ini?';
         }
         confirmModal.classList.remove('hidden');
     };
@@ -613,16 +843,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const radio = opt.previousElementSibling;
             opt.classList.toggle('bg-green-600', radio.value === selectedValue);
             opt.classList.toggle('text-white', radio.value === selectedValue);
+             opt.classList.toggle('text-slate-700', radio.value !== selectedValue);
         });
         const isStudent = selectedValue === 'student';
         classSelectionContainer.style.maxHeight = isStudent ? '100px' : '0';
         classSelectionContainer.style.opacity = isStudent ? '1' : '0';
+        classSelectionContainer.style.marginBottom = isStudent ? '1rem' : '0';
         regClassSelect.required = isStudent;
+
+        teacherSubjectContainer.style.maxHeight = isStudent ? '0' : '100px'; 
+        teacherSubjectContainer.style.opacity = isStudent ? '0' : '1';
+        teacherSubjectContainer.style.marginBottom = isStudent ? '0' : '1rem';
+        regSubjectInput.required = !isStudent; 
     };
 
     const togglePasswordVisibility = (e) => {
         const btn = e.currentTarget;
         const targetInput = document.getElementById(btn.dataset.target);
+        if (!targetInput) return; 
         if (targetInput.type === 'password') {
             targetInput.type = 'text';
             btn.innerHTML = `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59" /></svg>`;
@@ -632,17 +870,102 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const handleTextFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadedFileContent = e.target.result;
+                fileNameDisplay.textContent = `File dipilih: ${file.name}`;
+            };
+            reader.readAsText(file);
+        } else {
+            uploadedFileContent = null;
+            fileNameDisplay.textContent = '';
+        }
+    };
+
+    const processScheduleText = (text) => {
+        uploadError.classList.add('hidden');
+        if (!text || !text.trim()) {
+            uploadError.textContent = "Tidak ada data untuk diproses. Silakan pilih file."; 
+            uploadError.classList.remove('hidden');
+            return false;
+        }
+
+        const lines = text.trim().split('\n');
+        const newSchedules = [];
+        let errorOccurred = false;
+
+        lines.forEach((line, index) => {
+            const parts = line.split(',');
+            if (parts.length === 5) {
+                const [day, time, subject, teacher, room] = parts.map(p => p.trim());
+                if (day && time && subject && teacher && room) {
+                    newSchedules.push({ id: Date.now() + index, day, time, subject, teacher, room });
+                } else {
+                     uploadError.textContent = `Format salah pada baris ${index + 1}: Data tidak lengkap.`;
+                     errorOccurred = true;
+                }
+            } else {
+                uploadError.textContent = `Format salah pada baris ${index + 1}: Harus ada 5 kolom dipisah koma.`;
+                errorOccurred = true;
+            }
+        });
+
+        if (errorOccurred) {
+             uploadError.classList.remove('hidden');
+             return false;
+        }
+        
+        schedulesByClass[currentSelectedClass] = newSchedules;
+        saveSchedules();
+        renderSchedules();
+        return true;
+    };
+    
+    const handleImageFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (file && (file.type === "image/jpeg" || file.type === "image/png")) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadedImageFileContent = e.target.result; // Ini adalah data URL (base64)
+                imageFileNameDisplay.textContent = `File dipilih: ${file.name}`;
+                uploadImageError.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            uploadedImageFileContent = null;
+            imageFileNameDisplay.textContent = '';
+            uploadImageError.textContent = "Silakan pilih file JPG atau PNG.";
+            uploadImageError.classList.remove('hidden');
+        }
+    };
+
+    const processImageUpload = () => {
+        if (uploadedImageFileContent) {
+            imageSchedulesByClass[currentSelectedClass] = uploadedImageFileContent;
+            saveImageSchedules();
+            renderSchedules();
+            uploadImageModal.classList.add('hidden');
+            alert('Jadwal gambar berhasil diupload!');
+        } else {
+             uploadImageError.textContent = "Silakan pilih file gambar terlebih dahulu.";
+             uploadImageError.classList.remove('hidden');
+        }
+    };
+
+    const toggleFabMenu = () => {
+        fabToggle.classList.toggle('open');
+        fabUploadText.classList.toggle('show');
+        fabUploadImage.classList.toggle('show');
+        fabAddManual.classList.toggle('show');
+    };
+
+    // --- EVENT LISTENERS ---
     showRegisterBtn.addEventListener('click', () => showView('register-view'));
     backToLoginBtnRegister.addEventListener('click', () => showView('login-view'));
-    backToLoginBtnForgot.addEventListener('click', () => showView('login-view'));
-    showForgotPasswordBtn.addEventListener('click', () => {
-        forgotPasswordForm.reset();
-        forgotError.classList.add('hidden');
-        [forgotStep2, forgotStep3].forEach(s => s.classList.add('hidden'));
-        forgotStep1.classList.remove('hidden');
-        showView('forgot-password-view');
-    });
-
+    
     togglePasswordBtns.forEach(btn => btn.addEventListener('click', togglePasswordVisibility));
     roleRadios.forEach(radio => radio.addEventListener('change', (e) => updateRoleSelectionUI(e.target.value)));
     
@@ -651,18 +974,22 @@ document.addEventListener('DOMContentLoaded', () => {
         registerError.classList.add('hidden');
         const selectedRole = document.querySelector('input[name="role"]:checked').value;
         const className = regClassSelect.value;
+        const subject = regSubjectInput.value.trim(); 
         const username = document.getElementById('reg-username').value;
-        const question = document.getElementById('reg-question').value;
-        const secret = document.getElementById('reg-secret').value;
         const pass = document.getElementById('reg-password').value;
         const confirmPass = document.getElementById('reg-confirm-password').value;
         if (selectedRole === 'student' && !className) { registerError.textContent = "Silakan pilih kelas Anda!"; registerError.classList.remove('hidden'); return; }
-        if (!question) { registerError.textContent = "Silakan pilih pertanyaan rahasia!"; registerError.classList.remove('hidden'); return; }
-        if (!secret.trim()) { registerError.textContent = "Jawaban rahasia wajib diisi!"; registerError.classList.remove('hidden'); return; }
+        if (selectedRole === 'teacher' && !subject) { registerError.textContent = "Silakan isi mata pelajaran yang diajar!"; registerError.classList.remove('hidden'); return; } 
         if (pass !== confirmPass) { registerError.textContent = "Password dan konfirmasi tidak cocok!"; registerError.classList.remove('hidden'); return; }
         if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) { registerError.textContent = "Username sudah digunakan!"; registerError.classList.remove('hidden'); return; }
-        const newUser = { username, password: pass, role: selectedRole, secretQuestion: question, secret };
-        if (selectedRole === 'student') newUser.className = className;
+        
+        const newUser = { username, password: pass, role: selectedRole }; 
+        if (selectedRole === 'student') {
+             newUser.className = className;
+        } else { 
+            newUser.subject = subject;
+        }
+        
         users.push(newUser);
         saveUsers(); 
         registerForm.reset();
@@ -684,55 +1011,13 @@ document.addEventListener('DOMContentLoaded', () => {
             loginError.classList.remove('hidden');
         }
     });
-
-    forgotPasswordForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        forgotError.classList.add('hidden');
-        if (!forgotStep1.classList.contains('hidden')) {
-            const username = document.getElementById('forgot-username').value;
-            const userExists = users.find(u => u.username === username);
-            if (userExists) { 
-                userToReset = username;
-                document.getElementById('forgot-question-display').textContent = userExists.secretQuestion;
-                forgotStep1.classList.add('hidden'); 
-                forgotStep2.classList.remove('hidden'); 
-            } else { 
-                forgotError.textContent = "Username tidak ditemukan!"; 
-                forgotError.classList.remove('hidden'); 
-            }
-        }
-        else if (!forgotStep2.classList.contains('hidden')) {
-            const secret = document.getElementById('forgot-secret').value;
-            const user = users.find(u => u.username === userToReset);
-            if (user && user.secret.toLowerCase() === secret.toLowerCase()) { 
-                forgotStep2.classList.add('hidden'); 
-                forgotStep3.classList.remove('hidden'); 
-            } else { 
-                forgotError.textContent = "Jawaban rahasia salah!"; 
-                forgotError.classList.remove('hidden'); 
-            }
-        }
-        else if (!forgotStep3.classList.contains('hidden')) {
-            const newPassword = document.getElementById('forgot-new-password').value;
-            const confirmPassword = document.getElementById('forgot-confirm-password').value;
-            if (newPassword !== confirmPassword) { forgotError.textContent = "Password baru tidak cocok!"; forgotError.classList.remove('hidden'); return; }
-            const userIndex = users.findIndex(u => u.username === userToReset);
-            if (userIndex !== -1) {
-                users[userIndex].password = newPassword;
-                saveUsers();
-                alert("Password berhasil direset! Silakan login dengan password baru Anda.");
-                userToReset = null;
-                showView('login-view');
-            }
-        }
-    });
-
+    
     const doLogout = () => { currentUser = null; currentSelectedClass = null; showView('login-view'); };
     logoutBtn.addEventListener('click', doLogout);
     classSelectionLogoutBtn.addEventListener('click', doLogout);
     backToClassSelectionBtn.addEventListener('click', () => { currentSelectedClass = null; showView('class-selection-view'); });
+    addNewClassBtn.addEventListener('click', addCustomClass);
 
-    addScheduleBtn.addEventListener('click', () => openModal('add'));
     viewUsersBtn.addEventListener('click', () => { renderUsersList(); usersModal.classList.remove('hidden'); });
     closeUsersModalBtn.addEventListener('click', () => usersModal.classList.add('hidden'));
     cancelBtn.addEventListener('click', () => scheduleModal.classList.add('hidden'));
@@ -743,6 +1028,47 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSuggestionModalBtn.addEventListener('click', () => suggestionModal.classList.add('hidden'));
     viewSuggestionsBtn.addEventListener('click', () => { renderSuggestions(); viewSuggestionsModal.classList.remove('hidden'); });
     closeViewSuggestionsModalBtn.addEventListener('click', () => viewSuggestionsModal.classList.add('hidden'));
+
+    // --- FAB Listeners ---
+    fabToggle.addEventListener('click', toggleFabMenu);
+    fabAddManual.addEventListener('click', () => {
+        openModal('add');
+        toggleFabMenu(); // Tutup menu FAB
+    });
+    fabUploadText.addEventListener('click', () => {
+        uploadModalClassname.textContent = currentSelectedClass;
+        uploadFile.value = '';
+        fileNameDisplay.textContent = '';
+        uploadedFileContent = null;
+        uploadError.classList.add('hidden');
+        uploadModal.classList.remove('hidden');
+        toggleFabMenu(); // Tutup menu FAB
+    });
+    fabUploadImage.addEventListener('click', () => {
+        uploadImageModalClassname.textContent = currentSelectedClass;
+        uploadImageFile.value = '';
+        imageFileNameDisplay.textContent = '';
+        uploadedImageFileContent = null;
+        uploadImageError.classList.add('hidden');
+        uploadImageModal.classList.remove('hidden');
+        toggleFabMenu(); // Tutup menu FAB
+    });
+    
+    // --- Upload Modal Listeners ---
+    closeUploadModalBtn.addEventListener('click', () => uploadModal.classList.add('hidden'));
+    uploadFile.addEventListener('change', handleTextFileUpload);
+    processUploadBtn.addEventListener('click', () => {
+        const textToProcess = uploadedFileContent; 
+        if (processScheduleText(textToProcess)) {
+            uploadModal.classList.add('hidden');
+             alert('Jadwal berhasil diupload!');
+        }
+    });
+    
+    // --- Upload Image Modal Listeners ---
+    closeUploadImageModalBtn.addEventListener('click', () => uploadImageModal.classList.add('hidden'));
+    uploadImageFile.addEventListener('change', handleImageFileUpload);
+    processUploadImageBtn.addEventListener('click', processImageUpload);
 
     suggestionForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -796,6 +1122,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
+    deleteImageScheduleBtn.addEventListener('click', () => {
+         openConfirmModal(currentSelectedClass, 'imageSchedule');
+    });
+    
     usersTableBody.addEventListener('click', (e) => {
         const btn = e.target.closest('button.delete-user-btn');
         if (btn) {
@@ -819,6 +1149,10 @@ document.addEventListener('DOMContentLoaded', () => {
             suggestions = suggestions.filter(s => s.id !== itemToDelete);
             saveSuggestions();
             renderSuggestions();
+        } else if (itemDeleteType === 'imageSchedule') {
+            delete imageSchedulesByClass[itemToDelete]; // itemToDelete adalah currentSelectedClass
+            saveImageSchedules();
+            renderSchedules();
         }
         closeConfirmModal();
     });
@@ -826,9 +1160,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const init = () => {
         loadUsers(); 
         loadSchedules(); 
+        loadImageSchedules(); // Muat jadwal gambar
         loadSuggestions();
+        loadCustomClasses(); 
         showView('login-view');
-        updateRoleSelectionUI(document.querySelector('input[name="role"]:checked').value);
+        const initialRoleRadio = document.querySelector('input[name="role"]:checked');
+        if (initialRoleRadio) {
+             updateRoleSelectionUI(initialRoleRadio.value);
+        } else if (roleRadios.length > 0) { 
+             roleRadios[0].checked = true;
+             updateRoleSelectionUI(roleRadios[0].value);
+        }
     };
 
     init();
@@ -837,4 +1179,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
